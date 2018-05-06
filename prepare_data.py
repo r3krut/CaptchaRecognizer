@@ -64,7 +64,7 @@ if __name__ == '__main__':
 	data_masks.mkdir(exist_ok=True, parents=True)
 
 	#Total 121 samples
-	for num_dir in tqdm(range(0,120)): 
+	for num_dir in tqdm(range(0,121)): 
 		current_dir = final_prepared / str(num_dir)
 		for file in list(current_dir.glob('*')):
 			if 'mask' in str(file):
