@@ -7,6 +7,7 @@ import numpy as np
 """
 ===Loss function for multiclass segmentation
 ===Implementation from https://github.com/ternaus/robot-surgery-segmentation/loss.py
+Vladimir Iglovikov
 """
 
 class LossMulti:
