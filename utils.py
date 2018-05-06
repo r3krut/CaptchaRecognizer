@@ -1,6 +1,5 @@
 """
 Code from https://github.com/ternaus/robot-surgery-segmentation/utils.py
-Vladimir Iglovikov
 """
 
 import json
