@@ -1,13 +1,13 @@
 from dataset import data_path
-
+import numpy as np
 
 def get_split(fold):
-    folds = {0: [0, 19],
-             1: [20, 39],
-             2: [40, 59],
-             3: [60, 79],
-             4: [80, 99],
-             5: [100, 121]}
+    folds = {0: np.arange(0,20),
+             1: np.arange(20,40),
+             2: np.arange(40,60),
+             3: np.arange(60,80),
+             4: np.arange(80,100),
+             5: np.arange(100,122)}
 
     train_path = data_path / 'images'
 
@@ -16,8 +16,8 @@ def get_split(fold):
 
     for captcha_id in range(0, 121):
         if captcha_id in folds[fold]:
-            val_file_names += (train_path / ('img_' + str(captcha_id) + '.jpg'))
+            val_file_names.append(str((train_path / ('img_' + str(captcha_id) + '.jpg'))))
         else:
-            train_file_names += (train_path / ('img_' + str(captcha_id) + '.jpg'))
+            train_file_names.append(str((train_path / ('img_' + str(captcha_id) + '.jpg'))))
 
     return train_file_names, val_file_names
