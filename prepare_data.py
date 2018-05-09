@@ -17,6 +17,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from tqdm import tqdm
+import argparse
 
 digit_factor = 20
 
@@ -25,6 +26,9 @@ final_prepared = data_path / 'FinallPreparedImages'
 data_train = data_path / 'train'
 data_images = data_train / 'images'
 data_masks = data_train / 'masks'
+data_tests = data_train / 'tests'
+
+images_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/prepared_image')
 
 def rgb_mask_to_gray(rgb_img):
 	height = rgb_img.shape[0]
@@ -59,20 +63,44 @@ def rgb_mask_to_gray(rgb_img):
 
 
 if __name__ == '__main__':
-	data_train.mkdir(exist_ok=True, parents=True)
-	data_images.mkdir(exist_ok=True, parents=True)
-	data_masks.mkdir(exist_ok=True, parents=True)
+	
+	parser = argparse.ArgumentParser()
+	arg = parser.add_argument
+	arg('--type_prepare', type=str, default='train', choices=['train', 'test'])
+	arg('--count_tests', type=int, default=0, help='Number of tests to generate')
 
-	#Total 121 samples
-	for num_dir in tqdm(range(0,121)): 
-		current_dir = final_prepared / str(num_dir)
-		for file in list(current_dir.glob('*')):
-			if 'mask' in str(file):
-				mask_img = cv2.imread(str(file), 1)
-				gray_mask = rgb_mask_to_gray(mask_img)
-				cv2.imwrite(str(data_masks / ('img_' + str(num_dir) + '.png')), gray_mask)
-			else:
-				src_img = cv2.imread(str(file), 0)
-				cv2.imwrite(str(data_images / ('img_' + str(num_dir) + '.jpg')), src_img, 
-					[cv2.IMWRITE_JPEG_QUALITY, 100]) 
+	args = parser.parse_args()
 
+	if args.type_prepare == 'train':
+		data_train.mkdir(exist_ok=True, parents=True)
+		data_images.mkdir(exist_ok=True, parents=True)
+		data_masks.mkdir(exist_ok=True, parents=True)
+
+		#Total 121 samples
+		for num_dir in tqdm(range(0,121)): 
+			current_dir = final_prepared / str(num_dir)
+			for file in list(current_dir.glob('*')):
+				if 'mask' in str(file):
+					mask_img = cv2.imread(str(file), 1)
+					gray_mask = rgb_mask_to_gray(mask_img)
+					gray_mask = gray_mask[2:gray_mask.shape[0]-2, 4:gray_mask.shape[1]-4] #to (96,192)
+					cv2.imwrite(str(data_masks / ('img_' + str(num_dir) + '.png')), gray_mask)
+				else:
+					src_img = cv2.imread(str(file), 0)
+					src_img = src_img[2:src_img.shape[0]-2, 4:src_img.shape[1]-4] #to (96, 192)
+					cv2.imwrite(str(data_images / ('img_' + str(num_dir) + '.jpg')), src_img, 
+						[cv2.IMWRITE_JPEG_QUALITY, 100]) 
+	else:
+		all_subdirs = images_path.glob('*')
+		num_file = 0
+		for asub in all_subdirs:
+			if num_file > args.count_tests-1:
+				print("{} tests were generated.".format(num_file))
+				break
+			files = list(asub.glob('*'))
+			for file in files:
+				if 'src' in str(file):
+					src_img = cv2.imread(str(file), 0)
+					cv2.imwrite(str(data_tests / ('img_' + str(num_file) + '.jpg')), src_img, 
+						[cv2.IMWRITE_JPEG_QUALITY, 100])
+			num_file += 1			
