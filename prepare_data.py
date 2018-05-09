@@ -21,14 +21,14 @@ import argparse
 
 digit_factor = 20
 
-data_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/CaptchaRecognition/')
+data_path = Path('data')
 final_prepared = data_path / 'FinallPreparedImages'
 data_train = data_path / 'train'
 data_images = data_train / 'images'
 data_masks = data_train / 'masks'
 data_tests = data_train / 'tests'
 
-images_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/prepared_image')
+images_path = Path('prepared_images')
 
 def rgb_mask_to_gray(rgb_img):
 	height = rgb_img.shape[0]
