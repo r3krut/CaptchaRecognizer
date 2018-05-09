@@ -47,6 +47,8 @@ def validation_multi(model: nn.Module, criterion, valid_loader, num_classes):
     metrics = {'valid_loss': valid_loss, 'iou': average_iou}
     metrics.update(ious)
     metrics.update(dices)
+    metrics['valid_loss'] = (metrics['valid_loss']).astype(np.float64)
+    metrics['iou'] = (metrics['iou']).astype(np.float64)
     return metrics
 
 
