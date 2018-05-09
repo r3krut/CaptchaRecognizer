@@ -230,7 +230,7 @@ class ShiftScale:
 
 
 class ShiftScaleRotate:
-    def __init__(self, shift_limit=0.0625, scale_limit=0.1, rotate_limit=15, prob=0.5):
+    def __init__(self, shift_limit=0.0625, scale_limit=0.1, rotate_limit=30, prob=0.5):
         self.shift_limit = shift_limit
         self.scale_limit = scale_limit
         self.rotate_limit = rotate_limit
