@@ -1,4 +1,4 @@
-from dataset import data_path
+from prepare_data import data_train
 import numpy as np
 
 def get_split(fold):
