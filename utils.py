@@ -2,7 +2,7 @@
 Code from https://github.com/ternaus/robot-surgery-segmentation/utils.py
 """
 
-import json
+import codecs, json
 from datetime import datetime
 from pathlib import Path
 
@@ -68,7 +68,10 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
             mean_loss = 0
             for i, (inputs, targets) in enumerate(tl):
                 inputs, targets = variable(inputs), variable(targets)
+                #print("Inputs shape: {}".format(inputs.shape))
                 outputs = model(inputs)
+                #print("Outputs shape: {}".format(outputs.shape))
+                #print("Targets shape: {}".format(targets.shape))
                 loss = criterion(outputs, targets)
                 optimizer.zero_grad()
                 batch_size = inputs.size(0)
@@ -80,8 +83,8 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
                 mean_loss = np.mean(losses[-report_each:])
                 tq.set_postfix(loss='{:.5f}'.format(mean_loss))
                 if i and i % report_each == 0:
-                    write_event(log, step, loss=mean_loss)
-            write_event(log, step, loss=mean_loss)
+                    write_event(log, step, loss=(mean_loss).astype(np.float64))
+            write_event(log, step, loss=(mean_loss).astype(np.float64))
             tq.close()
             save(epoch + 1)
             valid_metrics = validation(model, criterion, valid_loader, num_classes)
