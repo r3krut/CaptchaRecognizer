@@ -9,7 +9,7 @@ def get_split(fold):
              4: np.arange(80,100),
              5: np.arange(100,122)}
 
-    train_path = data_path / 'images'
+    train_path = data_train / 'images'
 
     train_file_names = []
     val_file_names = []
