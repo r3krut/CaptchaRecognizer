@@ -6,7 +6,7 @@ with slightly modifications
 import argparse
 import json
 from pathlib import Path
-from validation import validation_binary, validation_multi
+from validation import validation_multi
 
 import torch
 from torch import nn
@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 import torch.backends.cudnn as cudnn
 import torch.backends.cudnn
 
-from models import UNet11, UNet16
+from model import UNet11, UNet16
 from loss import LossMulti
 from dataset import CaptchaDataset
 import utils
@@ -46,8 +46,8 @@ def main():
     root = Path(args.root)
     root.mkdir(exist_ok=True, parents=True)
 
-    #10 digits
-    num_classes = 10
+    #10 digits and background
+    num_classes = 11
 
     if args.model == 'UNet11':
         model = UNet11(num_classes=num_classes, pretrained='vgg')
