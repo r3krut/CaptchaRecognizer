@@ -74,6 +74,7 @@ class UNet11(nn.Module):
             self.encoder = models.vgg11(pretrained=False).features
 
         self.relu = nn.ReLU(inplace=True)
+        #nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
         self.conv1 = nn.Sequential(self.encoder[0],
                                    self.relu)
 
@@ -138,7 +139,7 @@ class UNet16(nn.Module):
         :param num_filters:
         :param pretrained:
             False - no pre-trained network used
-            vgg - encoder pre-trained with VGG11
+            vgg - encoder pre-trained with VGG16
         """
         super().__init__()
         self.num_classes = num_classes
