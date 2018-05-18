@@ -21,14 +21,14 @@ import argparse
 
 digit_factor = 20
 
-data_path = Path('data')
+data_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/CaptchaRecognition')
 final_prepared = data_path / 'FinallPreparedImages'
 data_train = data_path / 'train'
 data_images = data_train / 'images'
 data_masks = data_train / 'masks'
-data_tests = data_train / 'tests'
+data_tests = data_path / 'predict' / 'tests'
 
-images_path = Path('prepared_images')
+images_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/prepared_image')
 
 def rgb_mask_to_gray(rgb_img):
 	height = rgb_img.shape[0]
@@ -52,7 +52,7 @@ def rgb_mask_to_gray(rgb_img):
 				gray_mask[w,h] = 6
 			if all(pixel == (0,150,255)):	#6
 				gray_mask[w,h] = 7
-			if all(pixel == (115,0,255)):	#7
+			if all(pixel == (115,0,225)):	#7 wrong color. Must be 115,0,255
 				gray_mask[w,h] = 8
 			if all(pixel == (0,100,0)):		#8
 				gray_mask[w,h] = 9
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	arg = parser.add_argument
 	arg('--type_prepare', type=str, default='train', choices=['train', 'test'])
-	arg('--count_tests', type=int, default=0, help='Number of tests to generate')
+	arg('--count_tests', type=int, default=100, help='Number of tests to generate')
 
 	args = parser.parse_args()
 
@@ -91,6 +91,7 @@ if __name__ == '__main__':
 					cv2.imwrite(str(data_images / ('img_' + str(num_dir) + '.jpg')), src_img, 
 						[cv2.IMWRITE_JPEG_QUALITY, 100]) 
 	else:
+		data_tests.mkdir(exist_ok=True, parents=True)
 		all_subdirs = images_path.glob('*')
 		num_file = 0
 		for asub in all_subdirs:
