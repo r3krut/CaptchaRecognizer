@@ -26,7 +26,7 @@ def select_pixels(img, pix_val: int):
 	return mask
 
 
-def generate_bounds(img, img_to_draw, pix_values: dict):
+def generate_bounds(img, pix_values: dict):
 	bound_rects = []
 
 	for key, value in pix_values.items():
@@ -38,39 +38,67 @@ def generate_bounds(img, img_to_draw, pix_values: dict):
 			bb = cv.boundingRect(contour)
 			if bb[2] > 10 and bb[3] > 10:
 				bound_rects.append(bb)
+	bound_rects.sort(key=lambda br: int(br[0])) #sorting boud rectangles by x-coordinate
+	return bound_rects
 
-	img_copy = img_to_draw.copy()
-	cnt_num = 0
+
+"""
+ 	Calculates what digit contains in image
+	Performs search the most common pixels in image, after it do matching with colors_map
+"""
+def what_digit(img):
+	colors = {k*20 : 0 for k in range(0, 11)}
+
+	height = img.shape[0]
+	width = img.shape[1]
+
+	for h in range(0, width-1):
+		for w in range(0, height-1):
+			pix_val = img[w,h]
+			if pix_val == 0:
+				continue
+			colors[pix_val] += 1
+
+	max_val = max(colors, key=colors.get)
+	return colors_map[max_val] #what digit
+
+def recognize(img):
+	gray_img = pd.rgb_mask_to_gray(img)
+	unique_colors = distinct_colors(gray_img)
+	bound_rects = generate_bounds(gray_img, unique_colors)
+
+	if len(bound_rects) != 6:
+		print("Bad captcha. Count of bounding rectangles are equals {0}".format(len(bound_rects)))
+		copy_img = img.copy()
+		for br in bound_rects:
+			x = br[0]
+			y = br[1]
+			w = x + br[2]
+			h = y + br[3]
+			cv.rectangle(copy_img, (x,y), (w,h), (255,0,0), 1)
+		cv.imshow('Wrong image', copy_img)
+		cv.waitKey(0)
+		cv.destroyAllWindows()
+		return "Wrong image"
+
+	answer = ""
 	for br in bound_rects:
 		x = br[0]
 		y = br[1]
 		w = x + br[2]
 		h = y + br[3]
-		cv.rectangle(img_copy, (x,y), (w,h),(255,0,0),1)
-		print("Contour [{0}]: {1}".format(cnt_num, br))
-		cnt_num+=1
-	print("Number of contours: {}".format(len(bound_rects)))
-	cv.imshow('img', img_copy)	
-	cv.waitKey(0)
-	cv.destroyAllWindows()
-
+		sub_img = gray_img[y:h,x:w]
+		digit = what_digit(sub_img)
+		answer += str(digit)
+	return answer
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	arg = parser.add_argument
 	arg('--img_path', type=str, 
 		default='/home/r3krut/DataSets/NalogCaptchaDataTraining/CaptchaRecognition/predict/predicted_unet16/preds_masks_colored/img_3.png')
-
 	args = parser.parse_args()
 
 	img = cv.imread(args.img_path, 1)
-	gray_img = pd.rgb_mask_to_gray(img)
-
-	unique_colors = distinct_colors(gray_img)
-	print(unique_colors)
-
-	generate_bounds(gray_img, img, unique_colors)
-
-	#cv.imshow('Image', gray_img)
-	#cv.waitKey(0)
-	#cv.destroyAllWindows()
+	answer = recognize(img)
+	print(answer)
