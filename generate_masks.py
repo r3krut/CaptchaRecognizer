@@ -9,8 +9,9 @@ Script generates predictions, splitting original images into tiles, and assembli
 import argparse
 from prepare_train_val import get_split
 from dataset import CaptchaDataset
+import dataset as ds
 from prepare_data import data_tests
-import cv2
+import cv2 as cv
 from model import UNet16, UNet11
 import torch
 from pathlib import Path
@@ -94,11 +95,11 @@ def predict(model, from_file_names, batch_size: int, to_path):
         dataset=CaptchaDataset(from_file_names, transform=img_transform, mode='predict'),
         shuffle=False,
         batch_size=batch_size,
-        num_workers=args.workers,
+        num_workers=8,
         pin_memory=torch.cuda.is_available()
     )
 
-    for batch_num, (inputs, paths) in enumerate(tqdm(loader, desc='Predict')):
+    for batch_num, (inputs, paths) in enumerate(loader):
         inputs = utils.variable(inputs, volatile=True)
 
         outputs = model(inputs)
@@ -114,10 +115,9 @@ def predict(model, from_file_names, batch_size: int, to_path):
 
             full_mask = colored_masks(full_mask)
 
-            (to_path / 'preds_masks').mkdir(exist_ok=True, parents=True)
+            (to_path).mkdir(exist_ok=True, parents=True)
 
-            cv2.imwrite(str(to_path / 'preds_masks' / (Path(paths[i]).stem + '.png')), full_mask)
-
+            cv.imwrite(str(to_path / 'mask.png'), full_mask)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
