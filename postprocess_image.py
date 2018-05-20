@@ -62,12 +62,31 @@ def what_digit(img):
 	max_val = max(colors, key=colors.get)
 	return colors_map[max_val] #what digit
 
+"""
+	Naive predictor
+	Tries to predict how much digits contains in given image by the average values
+"""
+def predict_number_of_digits(img):
+	width = img.shape[1]
+
+	#When in bounding box contains one digit (avg width equals 27)
+	if width >= 27 - 20 and width < 27 + 10:
+		return 1
+	elif width >= 49 - 12 and width < 49 + 16: #for 2 digits (avg width equals 49)
+		return 2
+	elif width >= 73 - 8 and width < 73 + 17: #for 3 digits (avg width equals 73)
+		return 3
+	elif width >= 83 and width < 95 + 5: #for 4 digits (avg width equals 95)
+		return 4
+	return 5
+
 def recognize(img):
 	gray_img = pd.rgb_mask_to_gray(img)
 	unique_colors = distinct_colors(gray_img)
 	bound_rects = generate_bounds(gray_img, unique_colors)
 
-	if len(bound_rects) != 6:
+	answer = ""
+	if len(bound_rects) > 6:
 		print("Bad captcha. Count of bounding rectangles are equals {0}".format(len(bound_rects)))
 		copy_img = img.copy()
 		for br in bound_rects:
@@ -80,17 +99,26 @@ def recognize(img):
 		cv.waitKey(0)
 		cv.destroyAllWindows()
 		return "Wrong image"
-
-	answer = ""
-	for br in bound_rects:
-		x = br[0]
-		y = br[1]
-		w = x + br[2]
-		h = y + br[3]
-		sub_img = gray_img[y:h,x:w]
-		digit = what_digit(sub_img)
-		answer += str(digit)
-	return answer
+	elif len(bound_rects) == 6:
+		for br in bound_rects:
+			x = br[0]
+			y = br[1]
+			w = x + br[2]
+			h = y + br[3]
+			sub_img = gray_img[y:h,x:w]
+			digit = what_digit(sub_img)
+			answer += str(digit)
+	else:
+		for br in bound_rects:
+			x = br[0]
+			y = br[1]
+			w = x + br[2]
+			h = y + br[3]
+			sub_img = gray_img[y:h,x:w]
+			digit = what_digit(sub_img)
+			count_digits = int(predict_number_of_digits(sub_img))
+			answer += str(digit)*count_digits
+	return answer if len(answer) == 6 else "Bad answer [ " + answer + " ]\nNumber of digits are equals " + str(len(answer))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
@@ -102,3 +130,4 @@ if __name__ == '__main__':
 	img = cv.imread(args.img_path, 1)
 	answer = recognize(img)
 	print(answer)
+	
