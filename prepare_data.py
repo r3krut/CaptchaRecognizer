@@ -21,14 +21,14 @@ import argparse
 
 digit_factor = 20
 
-data_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/CaptchaRecognition')
-final_prepared = data_path / 'FinallPreparedImages'
-data_train = data_path / 'train'
-data_images = data_train / 'images'
-data_masks = data_train / 'masks'
-data_tests = data_path / 'predict' / 'tests'
+data_path = Path('cap_data/data') #path to data
+hand_masked_images = data_path / 'hand_masked_images' # path to hand masked images. This data will be must prepared to train 
+data_train = data_path / 'train' #path to train data
+data_images = data_train / 'images' #src train data
+data_masks = data_train / 'masks' #masked src train data
+data_tests = data_path / 'tests' #images after preprocessing, i.e. black-and-white images to test(predict masks for them)
 
-images_path = Path('/home/r3krut/DataSets/NalogCaptchaDataTraining/prepared_image')
+prepared_to_hand_masked = Path('cap_data/prepared_to_hand_masked') #path to dir where contains prepared black-and-white images.
 
 def rgb_mask_to_gray(rgb_img):
 	height = rgb_img.shape[0]
@@ -52,7 +52,7 @@ def rgb_mask_to_gray(rgb_img):
 				gray_mask[w,h] = 6
 			if all(pixel == (0,150,255)):	#6
 				gray_mask[w,h] = 7
-			if all(pixel == (115,0,225)):	#7 wrong color. Must be 115,0,255
+			if all(pixel == (115,0,255)):	#7 
 				gray_mask[w,h] = 8
 			if all(pixel == (0,100,0)):		#8
 				gray_mask[w,h] = 9
@@ -78,9 +78,10 @@ if __name__ == '__main__':
 
 		#Total 121 samples
 		for num_dir in tqdm(range(0,121)): 
-			current_dir = final_prepared / str(num_dir)
+			current_dir = hand_masked_images / str(num_dir)
+			
 			for file in list(current_dir.glob('*')):
-				if 'mask' in str(file):
+				if 'mask' in str(file.stem):
 					mask_img = cv2.imread(str(file), 1)
 					gray_mask = rgb_mask_to_gray(mask_img)
 					gray_mask = gray_mask[2:gray_mask.shape[0]-2, 4:gray_mask.shape[1]-4] #to (96,192)
@@ -92,7 +93,7 @@ if __name__ == '__main__':
 						[cv2.IMWRITE_JPEG_QUALITY, 100]) 
 	else:
 		data_tests.mkdir(exist_ok=True, parents=True)
-		all_subdirs = images_path.glob('*')
+		all_subdirs = prepared_to_hand_masked.glob('*')
 		num_file = 0
 		for asub in all_subdirs:
 			if num_file > args.count_tests-1:
