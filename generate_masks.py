@@ -66,9 +66,9 @@ def colored_masks(img):
     for h in range(0, width-1):
         for w in range(0, height-1):
             pixel = img[w, h]
-            if pixel == 20:                 #Color(RGB) for digit 0
+            if pixel == 20:                 #Color(BGR) for digit 0
                 colored_mask[w,h] = [255,0,0]
-            if pixel == 40:                 #Color(RGB) for digit 1
+            if pixel == 40:                 #Color(BGR) for digit 1
                 colored_mask[w,h] = [0,255,0]
             if pixel == 60:                 #2
                 colored_mask[w,h] = [255,255,0]
@@ -81,7 +81,7 @@ def colored_masks(img):
             if pixel == 140:                #6
                 colored_mask[w,h] = [0,150,255]
             if pixel == 160:                #7
-                colored_mask[w,h] = [115,0,225]
+                colored_mask[w,h] = [115,0,255]
             if pixel == 180:                #8
                 colored_mask[w,h] = [0,100,0]
             if pixel == 200:                #9
@@ -90,7 +90,7 @@ def colored_masks(img):
     return colored_mask
 
 
-def predict(model, from_file_names, batch_size: int, to_path):
+def predict(model, from_file_names, batch_size: int, to_path, single_predict=True):
     loader = DataLoader(
         dataset=CaptchaDataset(from_file_names, transform=img_transform, mode='predict'),
         shuffle=False,
@@ -117,12 +117,15 @@ def predict(model, from_file_names, batch_size: int, to_path):
 
             (to_path).mkdir(exist_ok=True, parents=True)
 
-            cv.imwrite(str(to_path / 'mask.png'), full_mask)
+            if single_predict:
+                cv.imwrite(str(to_path / 'mask.png'), full_mask)
+            else:
+                cv.imwrite(str(to_path / (str(Path(image_name).stem) + '.png')), full_mask)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
-    arg('--model_path', type=str, default='data/models/unet11_binary_20', help='path to model folder')
+    arg('--model_path', type=str, default='data/models/unet11', help='path to model folder')
     arg('--model_type', type=str, default='unet11', help='network architecture',
         choices=['unet11', 'unet16'])
     arg('--output_path', type=str, help='path to save images', default='.')
@@ -143,7 +146,7 @@ if __name__ == '__main__':
         output_path = Path(args.output_path)
         output_path.mkdir(exist_ok=True, parents=True)
 
-        predict(model, file_names, args.batch_size, output_path)
+        predict(model, file_names, args.batch_size, output_path, single_predict=False)
 
     elif args.fold == -1:
         for fold in [0, 1, 2, 3, 4, 5]:
@@ -156,7 +159,7 @@ if __name__ == '__main__':
             output_path = Path(args.output_path)
             output_path.mkdir(exist_ok=True, parents=True)
 
-            predict(model, file_names, args.batch_size, output_path)
+            predict(model, file_names, args.batch_size, output_path, single_predict=False)
     else:
         _, file_names = get_split(args.fold)
         model = get_model(str(Path(args.model_path).joinpath('model_{model}.pt'.format(model=args.model_type))),
@@ -167,4 +170,4 @@ if __name__ == '__main__':
         output_path = Path(args.output_path)
         output_path.mkdir(exist_ok=True, parents=True)
 
-        predict(model, file_names, args.batch_size, output_path)
+        predict(model, file_names, args.batch_size, output_path, single_predict=False)
