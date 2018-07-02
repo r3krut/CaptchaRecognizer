@@ -38,7 +38,7 @@ def generate_bounds(img, pix_values: dict):
 			bb = cv.boundingRect(contour)
 			if bb[2] > 10 and bb[3] > 10:
 				bound_rects.append(bb)
-	bound_rects.sort(key=lambda br: int(br[0])) #sorting boud rectangles by x-coordinate
+	bound_rects.sort(key=lambda br: int(br[0])) #sorting bound rectangles by x-coordinate
 	return bound_rects
 
 
@@ -127,15 +127,23 @@ def combine_nearest(bound_rectangles: list, threshold: int):
 						     If 'abs(rect1.x - rect2.x) <= threshold' is true then combine to one, else do not combine
 	"""
 	nearest_rectangles = []
-	for i in range(0, len(bound_rects)):
+	nearest_dict = {}
+	for i in range(0, len(bound_rectangles)-1):
 		b1 = bound_rectangles[i]
-		for j in (i+1, len(bound_rects)-1):
+		for j in range(i+1, len(bound_rectangles)):
 			b2 = bound_rectangles[j]
 			if abs(b1[0] - b2[0]) <= threshold:
 				nearest_rectangles.append((b1,b2))
+				nearest_dict[i] = '0'
+				nearest_dict[j] = '0'
 	combined_rects = []
 	for nr in nearest_rectangles:
 		combined_rects.append(combine_two_rects(nr[0], nr[1]))
+
+	for i in range(0, len(bound_rectangles)):
+		if i not in nearest_dict:
+			combined_rects.append(bound_rectangles[i])
+	combined_rects.sort(key=lambda br: int(br[0]))
 	return combined_rects
 
 def recognize(img):
@@ -145,37 +153,44 @@ def recognize(img):
 
 	answer = ""
 	if len(bound_rects) > 6:
-		print("Bad captcha. Count of bounding rectangles are equals {0}".format(len(bound_rects)))
 		copy_img = img.copy()
-		i = 0
-		for br in bound_rects:
-			x = br[0]
-			y = br[1]
-			w = x + br[2]
-			h = y + br[3]
-			cv.rectangle(copy_img, (x,y), (w,h), (255,0,0), 1)
-			print("Rect [{0}] : ({1},{2})[{3},{4}]".format(i,x,y,w,h))
-			i += 1
-		cv.imshow('Wrong image', copy_img)
-		cv.waitKey(0)
-		cv.destroyAllWindows()
-		return "Wrong image"
+		#try to combine nearest rectangles
+		combined_rects = combine_nearest(bound_rects, threshold=12)
+		if len(combined_rects) == 6:
+			for br in combined_rects:
+				x = br[0]
+				y = br[1]
+				xw = x + br[2]
+				yh = y + br[3]
+				sub_img = gray_img[y:yh,x:xw]
+				digit = what_digit(sub_img)
+				answer += str(digit)
+		else:
+			for br in combined_rects:
+				x = br[0]
+				y = br[1]
+				xw = x + br[2]
+				yh = y + br[3]
+				sub_img = gray_img[y:yh,x:xw]
+				digit = what_digit(sub_img)
+				count_digits = int(predict_number_of_digits(sub_img))
+				answer += str(digit)*count_digits
 	elif len(bound_rects) == 6:
 		for br in bound_rects:
 			x = br[0]
 			y = br[1]
-			w = x + br[2]
-			h = y + br[3]
-			sub_img = gray_img[y:h,x:w]
+			xw = x + br[2]
+			yh = y + br[3]
+			sub_img = gray_img[y:yh,x:xw]
 			digit = what_digit(sub_img)
 			answer += str(digit)
 	else:
 		for br in bound_rects:
 			x = br[0]
 			y = br[1]
-			w = x + br[2]
-			h = y + br[3]
-			sub_img = gray_img[y:h,x:w]
+			xw = x + br[2]
+			yh = y + br[3]
+			sub_img = gray_img[y:yh,x:xw]
 			digit = what_digit(sub_img)
 			count_digits = int(predict_number_of_digits(sub_img))
 			answer += str(digit)*count_digits
@@ -183,7 +198,7 @@ def recognize(img):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	arg = p:arser.add_argument
+	arg = parser.add_argument
 	arg('--img_path', type=str, 
 		default='path_to_img/img.png')
 	args = parser.parse_args()
