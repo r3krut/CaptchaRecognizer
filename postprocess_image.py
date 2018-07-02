@@ -42,11 +42,15 @@ def generate_bounds(img, pix_values: dict):
 	return bound_rects
 
 
-"""
- 	Calculates what digit contains in image
-	Performs search the most common pixels in image, after it do matching with colors_map
-"""
 def what_digit(img):
+	r"""
+ 		Calculates what digit contains in image
+		Performs search the most common pixels in image, after it do matching with colors_map
+		
+		Args: 
+			img: input image
+	"""
+
 	colors = {k*20 : 0 for k in range(0, 11)}
 
 	height = img.shape[0]
@@ -62,11 +66,15 @@ def what_digit(img):
 	max_val = max(colors, key=colors.get)
 	return colors_map[max_val] #what digit
 
-"""
-	Naive predictor
-	Tries to predict how much digits contains in given image by the average values
-"""
 def predict_number_of_digits(img):
+	r"""
+		Naive predictor
+		Tries to predict how much digits contains in given image by the average pix_values
+		
+		Args: 
+			img: input image
+	"""
+
 	width = img.shape[1]
 
 	#When in bounding box contains one digit (avg width equals 27)
@@ -80,6 +88,35 @@ def predict_number_of_digits(img):
 		return 4
 	return 5
 
+def combine_two_rects(b1, b2):
+	r"""
+		Combines two rectangles to one
+
+		Args:
+			b1 (NumPy array): first bound rect
+			b2 (NumPy array): second bound rect
+	"""
+	x1=b1[0]
+	y1=b1[1] 
+	w1=b1[2] 
+	h1=b1[3]
+	
+	x2=b2[0]
+	y2=b2[1]
+	w2=b2[2]
+	h2=b2[3]
+	
+	new_x = x1
+	new_w = (x2+w2)-x1
+	new_y = 0
+	if y1 <= y2:
+		new_y = y1
+		new_h = (y2+h2)-y1
+	else:
+		new_y = y2
+		new_h = (y1+h1)-y2
+	return (new_x, new_y, new_w, new_h)
+
 def recognize(img):
 	gray_img = pd.rgb_mask_to_gray(img)
 	unique_colors = distinct_colors(gray_img)
@@ -89,12 +126,15 @@ def recognize(img):
 	if len(bound_rects) > 6:
 		print("Bad captcha. Count of bounding rectangles are equals {0}".format(len(bound_rects)))
 		copy_img = img.copy()
+		i = 0
 		for br in bound_rects:
 			x = br[0]
 			y = br[1]
 			w = x + br[2]
 			h = y + br[3]
 			cv.rectangle(copy_img, (x,y), (w,h), (255,0,0), 1)
+			print("Rect [{0}] : ({1},{2})[{3},{4}]".format(i,x,y,w,h))
+			i += 1
 		cv.imshow('Wrong image', copy_img)
 		cv.waitKey(0)
 		cv.destroyAllWindows()
@@ -122,12 +162,11 @@ def recognize(img):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	arg = parser.add_argument
+	arg = p:arser.add_argument
 	arg('--img_path', type=str, 
-		default='/home/r3krut/DataSets/NalogCaptchaDataTraining/CaptchaRecognition/predict/predicted_unet16/preds_masks_colored/img_3.png')
+		default='path_to_img/img.png')
 	args = parser.parse_args()
 
 	img = cv.imread(args.img_path, 1)
 	answer = recognize(img)
 	print(answer)
-	
