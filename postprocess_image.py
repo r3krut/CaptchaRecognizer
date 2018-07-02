@@ -117,6 +117,27 @@ def combine_two_rects(b1, b2):
 		new_h = (y1+h1)-y2
 	return (new_x, new_y, new_w, new_h)
 
+def combine_nearest(bound_rectangles: list, threshold: int):
+	r"""
+		Tries combine nearest rectangles by x-coordinate.
+
+		Args:
+			bound_rectangles (list): list of rectangles sorted by x-coordinate
+			threshold (int): threshold which used to combine rectangles by x-coordinate. 
+						     If 'abs(rect1.x - rect2.x) <= threshold' is true then combine to one, else do not combine
+	"""
+	nearest_rectangles = []
+	for i in range(0, len(bound_rects)):
+		b1 = bound_rectangles[i]
+		for j in (i+1, len(bound_rects)-1):
+			b2 = bound_rectangles[j]
+			if abs(b1[0] - b2[0]) <= threshold:
+				nearest_rectangles.append((b1,b2))
+	combined_rects = []
+	for nr in nearest_rectangles:
+		combined_rects.append(combine_two_rects(nr[0], nr[1]))
+	return combined_rects
+
 def recognize(img):
 	gray_img = pd.rgb_mask_to_gray(img)
 	unique_colors = distinct_colors(gray_img)
