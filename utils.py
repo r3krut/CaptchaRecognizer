@@ -1,7 +1,3 @@
-"""
-Code from https://github.com/ternaus/robot-surgery-segmentation/utils.py
-"""
-
 import codecs, json
 from datetime import datetime
 from pathlib import Path

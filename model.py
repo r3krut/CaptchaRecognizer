@@ -1,8 +1,3 @@
-"""
-Part of this code was taken from https://github.com/ternaus/robot-surgery-segmentation/models.py 
-with slightly modification
-"""
-
 from torch import nn
 import torch
 from torchvision import models

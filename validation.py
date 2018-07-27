@@ -1,8 +1,3 @@
-"""
-This code was taken from https://github.com/ternaus/robot-surgery-segmentation/validation.py 
-with slightly modifications
-"""
-
 import numpy as np
 import utils
 from torch import nn

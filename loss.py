@@ -4,10 +4,6 @@ from torch.nn import functional as F
 import utils
 import numpy as np
 
-"""
-===Loss function for multiclass segmentation
-===Implementation from https://github.com/ternaus/robot-surgery-segmentation/loss.py
-"""
 
 class LossMulti:
     def __init__(self, jaccard_weight=0, class_weights=None, num_classes=1):

@@ -1,8 +1,3 @@
-"""
-This code was taken from https://github.com/ternaus/robot-surgery-segmentation/train.py 
-with slightly modifications
-"""
-
 import argparse
 import json
 from pathlib import Path

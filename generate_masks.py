@@ -1,11 +1,7 @@
 """
-This code was taken from https://github.com/ternaus/robot-surgery-segmentation/generate_masks.py 
-with slightly modifications 
-"""
-
-"""
 Script generates predictions, splitting original images into tiles, and assembling prediction back together
 """
+
 import argparse
 from prepare_train_val import get_split
 from dataset import CaptchaDataset

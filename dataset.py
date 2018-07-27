@@ -1,8 +1,3 @@
-"""
-This code was taken from https://github.com/ternaus/robot-surgery-segmentation/dataset.py 
-with slightly modifications 
-"""
-
 import torch
 import numpy as np
 import cv2
